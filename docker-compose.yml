@@ -1,0 +1,54 @@
+version: '3.4'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+
+    restart: always
+
+    env_file:
+      - .env
+
+    environment:
+      - API_REDIS_HOST=redis_stdx
+      - API_MONGO_HOST=mongo_stdx
+
+    ports:
+      - 8000:8000
+
+    command: [
+      "uvicorn", "app:app",
+      "--host", "0.0.0.0",
+      "--port", "8000"
+    ]
+
+    depends_on:
+      - redis_stdx
+      - mongo_stdx
+
+  mongo_stdx:
+    container_name: mongo_stdx
+    build:
+      context: .
+      dockerfile: docker/mongo/Dockerfile
+
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAM=admin
+    #   - MONGODB_INITDB_ROOT_PASSWORD=16551655    
+
+    ports:
+      - 27017:27017
+
+  redis_stdx:
+    container_name: redis_stdx
+    build: 
+      context: .
+      dockerfile: docker/redis/Dockerfile
+
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    
+    ports:
+      - 6379:6379
